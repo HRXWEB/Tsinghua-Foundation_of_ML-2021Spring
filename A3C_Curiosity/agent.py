@@ -3,6 +3,7 @@ import numpy as np
 import time
 import os
 from PIL import Image
+from icecream import ic
 
 from utils.utils import *
 from utils.network_params import *
@@ -58,7 +59,7 @@ class Worker():
         
         """
         self.last_total_health = 100.0
-        self.last_total_ammo2 = 52  
+        self.last_total_ammo2 = 52
         self.last_total_kills = 0
     
     def initialize_containers(self):
@@ -73,7 +74,7 @@ class Worker():
         self.episode_lengths = []
         self.episode_mean_values = []
         
-        if params.scenario=='deadly_corridor' or params.scenario=='defend_the_line':
+        if params.scenario=='deadly_corridor':
             self.episode_kills = []
             self.episode_health = []
             self.episode_ammo = []
@@ -85,10 +86,9 @@ class Worker():
             self.episode_ammo = []
             self.episode_kills = []
 
-        # if params.scenario=='defend_the_line':
-        #     self.episode_ammo = []
-        #     self.episode_kills = []
-        #     self.episode_health = []
+        if params.scenario=='defend_the_line':
+            self.episode_kills = []
+            self.episode_health = []
             
     def update_containers(self):
         """
@@ -104,7 +104,7 @@ class Worker():
         if params.use_curiosity:
             self.episode_curiosities.append(self.episode_curiosity)
         
-        if params.scenario=='deadly_corridor' or params.scenario=='defend_the_line':
+        if params.scenario=='deadly_corridor':
             self.episode_kills.append(self.last_total_kills)
             self.episode_health.append(np.maximum(0,self.last_total_health))    
             self.episode_ammo.append(self.last_total_ammo2)
@@ -116,10 +116,9 @@ class Worker():
             self.episode_ammo.append(self.last_total_ammo2)
             self.episode_kills.append(self.last_total_kills)
         
-        # if params.scenario=='defend_the_line':
-        #     self.episode_ammo.append(self.last_total_ammo2)
-        #     self.episode_kills.append(self.last_total_kills)
-        #     self.episode_health.append(np.maximum(0,self.last_total_health))
+        if params.scenario=='defend_the_line':
+            self.episode_kills.append(self.last_total_kills)
+            self.episode_health.append(np.maximum(0,self.last_total_health))
 
     def update_summary(self):
         """
@@ -142,7 +141,7 @@ class Worker():
         if params.use_curiosity:
             summary.value.add(tag='Perf/Curiosity', simple_value=float(mean_curiosity))
         
-        if params.scenario=='deadly_corridor' or params.scenario=='defend_the_line':
+        if params.scenario=='deadly_corridor':
             mean_kills = np.mean(self.episode_kills[-params.freq_summary:])
             mean_health = np.mean(self.episode_health[-params.freq_summary:])
             mean_ammo = np.mean(self.episode_ammo[-params.freq_summary:])
@@ -158,6 +157,12 @@ class Worker():
             mean_ammo = np.mean(self.episode_ammo[-params.freq_summary:])
             mean_kills = np.mean(self.episode_kills[-params.freq_summary:])
             summary.value.add(tag='Perf/Ammo', simple_value=float(mean_ammo))
+            summary.value.add(tag='Perf/Kills', simple_value=float(mean_kills))
+
+        if params.scenario=='defend_the_line':
+            mean_health = np.mean(self.episode_health[-params.freq_summary:])
+            mean_kills = np.mean(self.episode_kills[-params.freq_summary:])
+            summary.value.add(tag='Perf/Health', simple_value=float(mean_health))
             summary.value.add(tag='Perf/Kills', simple_value=float(mean_kills))
         
         summary.value.add(tag='Losses/Value Loss', simple_value=float(self.v_l))
@@ -187,7 +192,7 @@ class Worker():
                             self.name, self.episode_count, self.episode_reward, self.episode_curiosity, self.episode_reward/self.episode_step_count, 
                             self.episode_curiosity/self.episode_step_count, self.episode_step_count, time.time()-self.episode_st))
         
-        if params.scenario=='deadly_corridor' or params.scenario=='defend_the_line':
+        if params.scenario=='deadly_corridor':
             print('{}, health: {}, kills:{}, episode #{}, ep_reward: {}, ep_curiosity: {}, av_reward:{}, av_curiosity:{}, steps:{}, time costs:{}'.format(
                             self.name, np.maximum(0,self.last_total_health), self.last_total_kills, self.episode_count,
                             self.episode_reward, self.episode_curiosity, self.episode_reward/self.episode_step_count, 
@@ -199,11 +204,11 @@ class Worker():
                             self.episode_reward/self.episode_step_count, self.episode_curiosity/self.episode_step_count, 
                             self.episode_step_count, time.time()-self.episode_st))
 
-        # if params.scenario=='defend_the_line':
-        #     print('{}, kills:{}, episode #{}, ep_reward: {}, ep_curiosity: {}, av_reward:{}, av_curiosity:{}, steps:{}, time costs:{}'.format(
-        #                     self.name, self.last_total_kills, self.episode_count, self.episode_reward, self.episode_curiosity, 
-        #                     self.episode_reward/self.episode_step_count, self.episode_curiosity/self.episode_step_count, 
-        #                     self.episode_step_count, time.time()-self.episode_st))
+        if params.scenario=='defend_the_line':
+            print('{}, kills:{}, episode #{}, ep_reward: {}, ep_curiosity: {}, av_reward:{}, av_curiosity:{}, steps:{}, time costs:{}'.format(
+                            self.name, self.last_total_kills, self.episode_count,
+                            self.episode_reward, self.episode_curiosity, self.episode_reward/self.episode_step_count, 
+                            self.episode_curiosity/self.episode_step_count, self.episode_step_count, time.time()-self.episode_st))
                     
         if params.scenario=='my_way_home':
             print('{}, episode #{}, ep_reward: {}, ep_curiosity: {}, av_reward:{}, av_curiosity:{}, steps:{}, time costs:{}'.format(
@@ -223,7 +228,7 @@ class Worker():
         if d_health == 0:
             return 0
         elif d_health < 0:
-            return -5
+            return -0.06 * (100.0 - self.last_total_health)
     
     def get_ammo_reward(self):
         """
@@ -254,6 +259,19 @@ class Worker():
             return d_kill*100
         return 0
     
+    def get_angle_reward(self):
+        """
+        Description
+        --------------
+        Angle reward.
+        
+        """
+        angle = self.env.get_game_variable(GameVariable.ANGLE)
+        if 45 < angle < 315:
+            return -1
+        else:
+            return 0
+    
     def get_custom_reward(self,game_reward):
         """
         Description
@@ -271,8 +289,11 @@ class Worker():
             self.last_total_kills = self.env.get_game_variable(GameVariable.KILLCOUNT)
             return game_reward + self.get_ammo_reward()/10
         
-        if params.scenario=='deadly_corridor' or params.scenario=='defend_the_line':
+        if params.scenario=='deadly_corridor':
             return (game_reward/5 + self.get_health_reward() + self.get_kill_reward() + self.get_ammo_reward())/100.
+
+        if params.scenario=='defend_the_line':
+            return game_reward + self.get_health_reward() + + self.get_kill_reward()/100 + self.get_angle_reward()
         
         if params.scenario=='my_way_home':
             return game_reward
@@ -442,6 +463,16 @@ class Worker():
                     else:
                         curiosity = 0
                     
+                    # ic(reward)
+                    # if reward == 1:
+                    #     time.sleep(2)
+                    # else:
+                    #     time.sleep(0.3)
+                    # angle = self.env.get_game_variable(GameVariable.ANGLE)
+                    # ic(self.env.get_game_variable(GameVariable.ANGLE))
+                    # if 45 < angle < 315:
+                    #     ic(reward)
+
                     # Total reward
                     r = curiosity + reward
                     
