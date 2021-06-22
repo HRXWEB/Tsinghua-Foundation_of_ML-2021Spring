@@ -39,16 +39,16 @@ def evaluate(num_of_games):
         done = False
         observation, obs = env.reset()
         img_array.append(obs)
-
+        step = 1
         score = 0
         while not done:
-
+            step += 1
             action = agent.choose_best_action(observation)
             (observation, obs2), reward, done, _ = env.step(action)
             score += reward
             img_array.append(obs2)
 
-        print("Episode #", i, " Rewards: ", score)
+        print("Episode #", i, " Rewards: ", score, "Steps: ", step)
 
         images = np.array(img_array)
         gif_file = os.path.join(params.gif_path, agent.env_name + "_game_" + str(i + 1) + ".gif")
