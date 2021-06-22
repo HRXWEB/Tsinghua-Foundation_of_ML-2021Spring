@@ -1,6 +1,7 @@
-av
+argparse
 gym
 matplotlib
+moviepy
 numpy
 opencv-python
 torch

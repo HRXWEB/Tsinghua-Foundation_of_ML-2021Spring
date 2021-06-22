@@ -1,16 +1,13 @@
 from train import train
 from eval import evaluate
+from utils.args import parse_arguments
 
 
 if __name__ == "__main__":
-    load_checkpoint = False
-    skip_learning = False
 
-    evaluation = False
-    num_of_games = 5
+    params = parse_arguments()
 
-    if not skip_learning:
-        train(load_checkpoint)
-
-    if evaluation:
-        evaluate(num_of_games)
+    if params.play:
+        evaluate(params.play_episodes)
+    else:
+        train(params.load_model)

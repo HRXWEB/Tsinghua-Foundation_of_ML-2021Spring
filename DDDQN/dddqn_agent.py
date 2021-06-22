@@ -85,7 +85,7 @@ class DDDQNAgent(object):
             chkpt_dir=self.chkpt_dir,
         )
         self.q_eval.to(self.q_eval.device)
-        
+
         self.q_next = DeepQNetwork(
             self.lr,
             self.n_actions,
@@ -111,8 +111,8 @@ class DDDQNAgent(object):
     # Replay action selection
     def choose_best_action(self, observation):
         state = T.tensor([observation], dtype=T.float).to(self.q_eval.device)
-        actions = self.q_eval.forward(state)
-        action = T.argmax(actions).item()
+        _, advantage = self.q_eval.forward(state)
+        action = T.argmax(advantage).item()
 
         return action
 

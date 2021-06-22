@@ -1,20 +1,25 @@
 import numpy as np
-import os, sys
-from torchvision.io import write_video
+import os
 
 from dddqn_agent import DDDQNAgent
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from util import  make_envEVAL
+from utils.util import make_envEVAL, make_gif
+from utils.args import parse_arguments
 
 
 def evaluate(num_of_games):
+    params = parse_arguments()
+
+    if not os.path.exists(params.model_path):
+        os.makedirs(params.model_path)
+    if not os.path.exists(params.gif_path):
+        os.makedirs(params.gif_path)
+
     env = make_envEVAL("VizdoomDefendLine-v0")
 
     agent = DDDQNAgent(
-        gamma=0.99,
+        gamma=params.gamma,
         epsilon=1.0,
-        lr=0.0001,
+        lr=params.lr,
         input_dims=(env.observation_space.shape),
         n_actions=env.action_space.n,
         mem_size=5000,
@@ -22,16 +27,15 @@ def evaluate(num_of_games):
         batch_size=32,
         replace=1000,
         eps_dec=1e-5,
-        chkpt_dir="./content/",
+        chkpt_dir=params.model_path,
         algo="DDDQNAgent",
         env_name="vizdoomgym",
     )
 
-    img_array = []
-
     agent.load_models()
 
     for i in range(num_of_games):
+        img_array = []
         done = False
         observation, obs = env.reset()
         img_array.append(obs)
@@ -39,16 +43,13 @@ def evaluate(num_of_games):
         score = 0
         while not done:
 
-            action = agent.choose_action(observation)
+            action = agent.choose_best_action(observation)
             (observation, obs2), reward, done, _ = env.step(action)
             score += reward
-            for _ in range(2):
-                img_array.append(obs2)
-
-        for _ in range(12):
-            img_array.append(np.empty([240, 320, 3], dtype=np.uint8))
+            img_array.append(obs2)
 
         print("Episode #", i, " Rewards: ", score)
 
-    # Writes the the output image sequences in a video file
-    write_video("./content/doom.mp4", img_array, 25, video_codec="libx264", options=None)
+        images = np.array(img_array)
+        gif_file = os.path.join(params.gif_path, "game_" + str(i + 1) + ".gif")
+        make_gif(images, gif_file, fps=100)

@@ -1,20 +1,26 @@
 import numpy as np
-import os, sys
+import os
 
 from dddqn_agent import DDDQNAgent
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from util import make_env, plot_learning_curve, plot_loss_curve
+from utils.util import make_env, plot_learning_curve, plot_loss_curve
+from utils.args import parse_arguments
 
 
 def train(load_checkpoint):
+    params = parse_arguments()
+
+    if not os.path.exists(params.model_path):
+        os.makedirs(params.model_path)
+    if not os.path.exists(params.plot_path):
+        os.makedirs(params.plot_path)
+
     env = make_env("VizdoomDefendLine-v0")
     best_score = -np.inf
-    n_games = 1500
+    n_games = params.max_episodes
     agent = DDDQNAgent(
-        gamma=0.99,
+        gamma=params.gamma,
         epsilon=1.0,
-        lr=0.0001,
+        lr=params.lr,
         input_dims=(env.observation_space.shape),
         n_actions=env.action_space.n,
         mem_size=5000,
@@ -22,7 +28,7 @@ def train(load_checkpoint):
         batch_size=32,
         replace=1000,
         eps_dec=1e-5,
-        chkpt_dir="./content/",
+        chkpt_dir=params.model_path,
         algo="DDDQNAgent",
         env_name="vizdoomgym",
     )
@@ -75,12 +81,12 @@ def train(load_checkpoint):
 
         eps_history.append(agent.epsilon)
 
-        if (i + 1) % 100 == 0:
+        if (i + 1) % params.freq_plot == 0:
             fname = agent.algo + "_" + agent.env_name + "_lr" + str(agent.lr) + "_" + str(i + 1) + "games_score"
-            figure_file = "plots/" + fname + ".png"
+            figure_file = params.plot_path + fname + ".png"
             x = [i + 1 for i in range(len(scores))]
             plot_learning_curve(x, scores, eps_history, figure_file)
             fname = agent.algo + "_" + agent.env_name + "_lr" + str(agent.lr) + "_" + str(i + 1) + "games_loss"
-            figure_file = "plots/" + fname + ".png"
+            figure_file = params.plot_path + fname + ".png"
             x = [i + 1 for i in range(len(loss_array))]
             plot_loss_curve(x, loss_array, figure_file)
