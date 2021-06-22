@@ -28,7 +28,7 @@ def train_agents():
     if not os.path.exists(params.frames_path):
         os.makedirs(params.frames_path)
 
-    with tf.device("/cpu:0"): 
+    with tf.device("/gpu:0"): 
         
         # Generate global networks : Actor-Critic and ICM
         master_network = AC_Network(state_size, action_size, 'global') # Generate global AC network
