@@ -1,5 +1,6 @@
 import numpy as np
 import os
+from vizdoom import GameVariable
 
 from dddqn_agent import DDDQNAgent
 from utils.util import make_env, plot_learning_curve, plot_loss_curve
@@ -46,6 +47,10 @@ def train(load_checkpoint):
         while not done:
             action = agent.choose_action(observation)
             observation_, reward, done, _ = env.step(action)
+            angle = env.game.get_game_variable(GameVariable.ANGLE)
+            if params.custom_reward:
+                if angle > 130 and angle < 230:
+                    reward -= 1
             score += reward
 
             agent.store_transition(observation, action, reward, observation_, int(done))

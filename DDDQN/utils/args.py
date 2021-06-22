@@ -14,7 +14,7 @@ def parse_arguments():
     parser.add_argument("--play", action="store_true", help="Launch agent to play")
     parser.add_argument("--play_episodes", type=int, default=5, help="Number of episodes to play")
     parser.add_argument("--freq_plot", type=int, default=200, help="Frequence of episodes to save plot")
-    parser.add_argument("--freq_gif_save", type=int, default=25, help="Frequence of episodes to save gifs")
+    parser.add_argument("--custom_reward", action="store_true", help="Add penalty if facing backward")
 
     game_args, _ = parser.parse_known_args()
 

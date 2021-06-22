@@ -5,7 +5,7 @@ import moviepy.editor as mpy
 import numpy as np
 import gym
 import vizdoomgym
-from vizdoom import Mode
+from vizdoom import Mode, GameVariable
 
 
 """## Training Environment
@@ -104,6 +104,8 @@ class StackFrames(gym.ObservationWrapper):
 
 def make_env(env_name, shape=(84, 84, 1), repeat=4, clip_rewards=False, no_ops=0, fire_first=False):
     env = gym.make(env_name)
+    env.game.add_available_game_variable(GameVariable.ANGLE)
+    env.game.init()
     env = PreprocessFrame(shape, env)
     env = RepeatActionAndMaxFrame(env, repeat, clip_rewards, no_ops, fire_first)
 

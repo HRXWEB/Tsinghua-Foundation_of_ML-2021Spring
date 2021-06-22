@@ -51,5 +51,5 @@ def evaluate(num_of_games):
         print("Episode #", i, " Rewards: ", score)
 
         images = np.array(img_array)
-        gif_file = os.path.join(params.gif_path, "game_" + str(i + 1) + ".gif")
+        gif_file = os.path.join(params.gif_path, agent.env_name + "_game_" + str(i + 1) + ".gif")
         make_gif(images, gif_file, fps=100)

@@ -2,6 +2,7 @@ import numpy as np
 import torch as T
 
 from dddqn_network import DeepQNetwork
+from utils.args import parse_arguments
 
 """## Storing Replay Memories
 In this section we will create a mechanism for the agent ot keep track of statesm actions, rewards, new states, and the final state.
@@ -60,6 +61,7 @@ class DDDQNAgent(object):
         env_name=None,
         chkpt_dir="tmp/dqn",
     ):
+        params = parse_arguments()
         self.gamma = gamma
         self.epsilon = epsilon
         self.lr = lr
@@ -70,6 +72,8 @@ class DDDQNAgent(object):
         self.eps_dec = eps_dec
         self.replace_target_cnt = replace
         self.algo = algo
+        if params.custom_reward:
+            env_name += "_custom_reward"
         self.env_name = env_name
         self.chkpt_dir = chkpt_dir
         self.action_space = [i for i in range(n_actions)]
