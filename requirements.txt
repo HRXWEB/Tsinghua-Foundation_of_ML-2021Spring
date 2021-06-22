@@ -1,0 +1,9 @@
+argparse
+gym
+matplotlib
+moviepy
+numpy
+opencv-python
+torch
+vizdoom
+vizdoomgym

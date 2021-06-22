@@ -1,3 +1,4 @@
+
 # Tsinghua-Foundation_of_ML-2021Spring
 Final_Projets
 
@@ -8,3 +9,11 @@ Final_Projets
 2.scipy==1.2.1
 
 3.pillow==6.0.0
+
+# Project 6: Playing ViZDoom with Deep Reinforcement Learning
+
+This is the final project for Foundation of Machine Learning - 2021 Spring.
+
+## Double Dueling DQN
+
+
