@@ -1,0 +1,8 @@
+av
+gym
+matplotlib
+numpy
+opencv-python
+torch
+vizdoom
+vizdoomgym
