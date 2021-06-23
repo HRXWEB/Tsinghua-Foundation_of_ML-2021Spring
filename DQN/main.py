@@ -9,6 +9,6 @@ if __name__ == "__main__":
     play_episodes = 5
 
     if skip_training:
-        evaluate()
+        evaluate(play_episodes)
     else:
         train(load_model)
