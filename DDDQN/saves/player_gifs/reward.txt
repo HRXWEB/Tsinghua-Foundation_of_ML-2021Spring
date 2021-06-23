@@ -1,0 +1,5 @@
+1. steps: 125 r=11
+2. steps: 208 r=23
+3. steps: 310 r=30
+4. steps: 185 r=17
+5. steps: 124 r=13
