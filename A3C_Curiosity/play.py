@@ -16,8 +16,10 @@ def play_with_agent(params):
         Agent = Worker(0, state_size, action_size, player_mode=True)
 
         print('Loading Model...')
-        saver = tf.train.Saver()
-        ckpt = tf.train.get_checkpoint_state(params.model_path)
+        saver = tf.compat.v1.train.Saver()
+        ckpt = tf.train.get_checkpoint_state(params.model_path+'_curiosity')
+        ic(params.model_path)
+        ic(ckpt)
         saver.restore(sess, ckpt.model_checkpoint_path)
         print('Successfully loaded!')
 

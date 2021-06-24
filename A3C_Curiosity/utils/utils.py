@@ -31,15 +31,17 @@ def create_environment(scenario = 'basic', no_window = False, actions_type="all"
     """
     
     game = DoomGame()
-    if no_window:
-        game.set_window_visible(False)        
-    else:
-        game.set_window_visible(True)
+    
     
     # Load the correct configuration
     game.load_config(os.path.join("scenarios",params.scenario+".cfg"))
     game.set_doom_scenario_path(os.path.join("scenarios",params.scenario+".wad"))
     
+    if no_window:
+        game.set_window_visible(False)        
+    else:
+        game.set_window_visible(True)
+
     # Switch to RGB in player mode
     if player_mode:
         game.set_screen_format(ScreenFormat.RGB24)
@@ -74,25 +76,8 @@ def button_combinations(scenario='basic'):
     m_forward_backward = [[True, False], [False, True], [False, False]]  # move forward and backward
     t_left_right = [[True, False], [False, True], [False, False]]  # turn left and turn right
 
-    if scenario=='deadly_corridor':
-        actions = np.identity(6,dtype=int).tolist()
-        actions.extend([[0, 0, 1, 0, 1, 0],
-                        [0, 0, 1, 0, 0, 1], 
-                        [1, 0, 1, 0, 0, 0],
-                        [0, 1, 1, 0, 0, 0]])
-
     if scenario=='basic':
         for i in m_left_right:
-            for j in attack:
-                actions.append(i+j)
-
-    if scenario=='my_way_home':
-        actions = np.identity(3,dtype=int).tolist()
-        actions.extend([[1, 0, 1],
-                        [0, 1, 1]])
-
-    if scenario=='defend_the_center':
-        for i in t_left_right:
             for j in attack:
                 actions.append(i+j)
 
